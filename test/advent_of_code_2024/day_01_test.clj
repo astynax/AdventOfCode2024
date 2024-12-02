@@ -3,9 +3,7 @@
             [advent-of-code-2024.day-01 :refer :all]))
 
 (deftest solution1-test
-  (testing "First solution is right"
-    (is (= solution1 2086478))))
+  (is (= 2086478 solution1)))
 
 (deftest solution2-test
-  (testing "Second solution is right"
-    (is (= solution2 24941624))))
+  (is (= 24941624 solution2)))
