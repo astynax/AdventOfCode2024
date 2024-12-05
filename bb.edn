@@ -1,0 +1,40 @@
+{:tasks
+ {:requires ([babashka.fs :as fs]
+             [babashka.http-client :as http]
+             [clojure.string :as s]
+             [selmer.parser :refer [render]])
+  :init
+  (def day (->> (java.time.LocalDateTime/now)
+                .getDayOfMonth))
+
+  new-day
+  (do (run 'fetch)
+      (run 'scaffold))
+
+  fetch
+  (let [out-input (format "resources/day-%02d.input" day)]
+    (when-not (fs/exists? out-input)
+      (let [url (format "https://adventofcode.com/2024/day/%d/input" day)
+            session (s/trim (slurp ".session"))
+            req {:headers {:cookie (format "session=%s" session)}}
+            {:keys [status body]} (http/get url req)]
+        (if (not= status 200)
+          (println body)
+          (do (spit out-input body)
+              (println "Input fetched"))))))
+
+  scaffold
+  (let [out-day (format "src/advent_of_code_2024/day_%02d.clj" day)
+        out-test (format "test/advent_of_code_2024/day_%02d_test.clj" day)
+        env {:day (format "%02d" day)}]
+
+    (when-not (fs/exists? out-day)
+      (let [tpl (slurp "templates/day.clj")]
+        (spit out-day (render tpl env))
+        (println "Generated" out-day)))
+
+    (when-not (fs/exists? out-test)
+      (let [tpl (slurp "templates/test.clj")]
+        (spit out-test (render tpl env))
+        (println "Generated" out-test)))
+    )}}
