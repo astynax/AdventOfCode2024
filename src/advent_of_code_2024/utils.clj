@@ -13,12 +13,26 @@
 (defn topo-map
   ([text] (topo-map text (fn [_ v] v)))
   ([text look-at]
-   (reduce
-    (fn [m [k v]] (assoc m k v))
+   (into
     {}
-    (for [[y row] (enumerate (s/split-lines (s/trim text)))
+    (for [[y row] (enumerate (if (string? text)
+                               (s/split-lines (s/trim text))
+                               text))
           [x chr] (enumerate row)
           :let [pos [x y]
                 v (look-at pos chr)]
           :when (some? v)]
       [pos v]))))
+
+(defn topo-map-bound
+  ([text] (topo-map-bound text (fn [_ v] v)))
+  ([text look-at]
+   (let [lines (s/split-lines (s/trim text))
+         h (count lines)
+         w (count (first lines))]
+     {:map (topo-map lines look-at)
+      :w w
+      :h h
+      :in-bounds? (fn [[x y]]
+                    (and (<= 0 x) (< x w)
+                         (<= 0 y) (< y h)))})))
