@@ -2,7 +2,7 @@
   (:require [clojure.java.io :as io]
             [clojure.string :as s]
             [clojure.math :as m]
-            [clojure.zip :as z]))
+            [advent-of-code-2024.ddl :as ddl]))
 
 (defn decode [text]
   (for [[ch free id] (map vector (s/trim text)
@@ -46,51 +46,39 @@
                (assoc nj nil))
            ni nj)))))
 
-(defn find-place [z s]
-  (loop [z z]
-    (let [[n i] (z/node z)]
-      (if (and (nil? i)
-               (>= n s))
-        z
-        (when-let [nz (z/right z)]
-          (recur nz))))))
-
-(defn insert [l [n i]]
-  (let [z (z/down (z/vector-zip l))]
-    (when-let [z (find-place z n)]
-      (let [[s _] (z/node z)
-            z (z/replace z [n i])]
-        (-> (if (> s n)
-              (z/insert-right z [(- s n) nil])
-              z)
-            z/root)))))
-
-(defn next-file [z]
-  (loop [z (z/left z)]
-    (when (some? z)
-      (if (-> z z/node (get 1) nil?)
-        (recur (z/left z))
-        z))))
+(defn next-file [ddl k]
+  (loop [k (:prev (ddl/at ddl k))]
+    (when (some? k)
+      (let [p (ddl/at ddl k)]
+        (if (some? (get-in p [:value 1]))
+          k
+          (recur (:prev p)))))))
 
 (defn optimize-no-frag [initial-data]
-  (let [start (-> initial-data vec
-                  z/vector-zip
-                  z/down
-                  z/rightmost)
-        end (loop [z start]
-              (let [ls (get-in z [1 :l])]
-                (if (empty? ls)
-                  z
-                  (let [file (z/node z)
-                        z (if-let [nl (insert ls file)]
-                            (-> z
-                                (assoc-in [1 :l] nl)
-                                (z/replace (assoc file 1 nil)))
-                            z)]
-                    (if-let [nz (next-file z)]
-                      (recur nz)
-                      z)))))]
-    (as-blocks (z/root end))))
+  (loop [ddl (ddl/seq-> initial-data)
+         file (:last ddl)]
+    (if (nil? file)
+      (-> ddl
+          ddl/->seq
+          as-blocks)
+      (let [{[s v] :value} (ddl/at ddl file)]
+        (if-let [[k ps] (loop [k (:first ddl)]
+                          (when (not= k file)
+                            (let [{[ps pv] :value
+                                   n :next} (ddl/at ddl k)]
+                              (cond
+                                (and (nil? pv) (<= s ps)) [k ps]
+                                (nil? n) nil
+                                :else (recur n)))))]
+          (let [new (-> ddl
+                        (ddl/edit k (constantly [s v]))
+                        (ddl/edit file (constantly [s nil])))
+                new (if (< s ps)
+                      (ddl/insert-after new k [(- ps s) nil])
+                      new)
+                new-file (next-file new file)]
+            (recur new new-file))
+          (recur ddl (next-file ddl file)))))))
 
 (defn checksum [data]
   (->> data
