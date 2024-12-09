@@ -42,7 +42,12 @@
 (defn | [total suffix]
   (if (zero? suffix)
     (* total 10)
-    (let [d (long (m/pow 10 (inc (m/floor (m/log10 suffix)))))]
+    (let [d (->> suffix
+                 m/log10
+                 m/floor
+                 inc
+                 (m/pow 10)
+                 long)]
       (+ (* total d) suffix))))
 
 (def solution1 #(total-calibration-result [+ *] input))

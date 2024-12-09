@@ -10,6 +10,9 @@
   (mapv (fn [i] (mapv #(get % i) xss))
         (range (count (first xss)))))
 
+(defn keys-for [x m]
+  (for [[k v] m :when (= v x)] k))
+
 (defn topo-map
   ([text] (topo-map text (fn [_ v] v)))
   ([text look-at]
