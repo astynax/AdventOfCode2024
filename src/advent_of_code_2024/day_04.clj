@@ -1,17 +1,22 @@
 (ns advent-of-code-2024.day-04
   (:require [clojure.java.io :as io]
-            [advent-of-code-2024.utils :refer :all]))
+            [clojure.string :as s]
+            [advent-of-code-2024.utils :refer [enumerate keys-of]]))
 
 (defn decode [raw]
   (reduce
    (fn [m [k v]] (assoc m k v)) {}
-   (for [[y line] (enumerate (clojure.string/split-lines raw))
+   (for [[y line] (-> raw
+                      s/trim
+                      s/split-lines
+                      enumerate)
          [x c] (enumerate line)]
      [[x y] c])))
 
 (def input (decode (slurp (io/resource "day-04.input"))))
 
-(def example (decode "MMMSXXMASM
+(def example (decode "
+MMMSXXMASM
 MSAMXMSMSA
 AMXSXMAAMM
 MSAMASMSMX
@@ -20,7 +25,8 @@ XXAMMXXAMA
 SMSMSASXSS
 SAXAMASAAA
 MAMMMXMMMM
-MXMXAXMASX"))
+MXMXAXMASX
+"))
 
 (defn gather [m [x0 y0] [dx dy]]
   (for [i (range 4)
@@ -40,8 +46,10 @@ MXMXAXMASX"))
        count))
 
 (defn count-all [m]
-  (let [ks (for [[k v] m :when (= \X v)] k)]
-    (reduce + (map #(count-at m %) ks))))
+  (->> m
+       (keys-for \X)
+       (map #(count-at m %))
+       (reduce +)))
 
 (defn x-mas-at? [m [x y]]
   (and
@@ -56,7 +64,7 @@ MXMXAXMASX"))
          (= x-es [\S \M \S \M])))))
 
 (defn count-all-x-mas [m]
-  (->> (for [[k v] m :when (= \A v)] k)
+  (->> (keys-for \A m)
        (filter #(x-mas-at? m %))
        count))
 
