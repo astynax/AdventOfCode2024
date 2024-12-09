@@ -2,7 +2,7 @@
   (:require [clojure.java.io :as io]
             [clojure.string :as s]
             [clojure.math :as m]
-            [advent-of-code-2024.ddl :as ddl]))
+            [advent-of-code-2024.dll :as dll]))
 
 (defn decode [text]
   (for [[ch free id] (map vector (s/trim text)
@@ -46,39 +46,39 @@
                (assoc nj nil))
            ni nj)))))
 
-(defn next-file [ddl k]
-  (loop [k (:prev (ddl/at ddl k))]
+(defn next-file [dll k]
+  (loop [k (:prev (dll/at dll k))]
     (when (some? k)
-      (let [p (ddl/at ddl k)]
+      (let [p (dll/at dll k)]
         (if (some? (get-in p [:value 1]))
           k
           (recur (:prev p)))))))
 
 (defn optimize-no-frag [initial-data]
-  (loop [ddl (ddl/seq-> initial-data)
-         file (:last ddl)]
+  (loop [dll (dll/seq-> initial-data)
+         file (:last dll)]
     (if (nil? file)
-      (-> ddl
-          ddl/->seq
+      (-> dll
+          dll/->seq
           as-blocks)
-      (let [{[s v] :value} (ddl/at ddl file)]
-        (if-let [[k ps] (loop [k (:first ddl)]
+      (let [{[s v] :value} (dll/at dll file)]
+        (if-let [[k ps] (loop [k (:first dll)]
                           (when (not= k file)
                             (let [{[ps pv] :value
-                                   n :next} (ddl/at ddl k)]
+                                   n :next} (dll/at dll k)]
                               (cond
                                 (and (nil? pv) (<= s ps)) [k ps]
                                 (nil? n) nil
                                 :else (recur n)))))]
-          (let [new (-> ddl
-                        (ddl/edit k (constantly [s v]))
-                        (ddl/edit file (constantly [s nil])))
+          (let [new (-> dll
+                        (dll/edit k (constantly [s v]))
+                        (dll/edit file (constantly [s nil])))
                 new (if (< s ps)
-                      (ddl/insert-after new k [(- ps s) nil])
+                      (dll/insert-after new k [(- ps s) nil])
                       new)
                 new-file (next-file new file)]
             (recur new new-file))
-          (recur ddl (next-file ddl file)))))))
+          (recur dll (next-file dll file)))))))
 
 (defn checksum [data]
   (->> data
