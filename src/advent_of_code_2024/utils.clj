@@ -39,3 +39,27 @@
       :in-bounds? (fn [[x y]]
                     (and (<= 0 x) (< x w)
                          (<= 0 y) (< y h)))})))
+
+(def char->digit
+  {\0 0
+   \1 1
+   \2 2
+   \3 3
+   \4 4
+   \5 5
+   \6 6
+   \7 7
+   \8 8
+   \9 9})
+
+(defn flatmap [f xs]
+  (for [x xs
+        r (f x)] r))
+
+(defn stabilize [f x]
+  (loop [x x
+         p ::never]
+    (let [nx (f x)]
+      (if (= nx p)
+        nx
+        (recur nx x)))))
