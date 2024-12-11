@@ -11,10 +11,10 @@
     123000 [123 0]))
 
 (deftest count-after-blinks-test
-  (is (= 55312 (count-after-blinks 25 [125 17]))))
+  (is (= 55312 (blinks-of-many 25 [125 17]))))
 
 (deftest solution1-test
   (is (= 186424 solution1)))
 
 (deftest solution2-test
-  (is (= 219838428124832 (solution2))))
+  (is (= 219838428124832 solution2)))
