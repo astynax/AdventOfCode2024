@@ -5,16 +5,20 @@
 (def pattern #"p=(-?\d+),(-?\d+) v=(-?\d+),(-?\d+)")
 
 (defn decode [text]
-  (for [[_ & ns] (re-seq pattern text)
-        :let [[x y dx dy] (map parse-long ns)]]
-    {:x x
-     :y y
-     :dx dx
-     :dy dy}))
+  (->> (for [[_ & ns] (re-seq pattern text)
+             :let [[x y dx dy] (map parse-long ns)]]
+         {:x x
+          :y y
+          :dx dx
+          :dy dy})
+       vec))
 
-(def input {:rs (vec (decode (slurp (io/resource "day-14.input"))))
-            :w 101
-            :h 103})
+(def input (->> (io/resource "day-14.input")
+                slurp
+                decode
+                (assoc {:w 101
+                        :h 103}
+                       :rs)))
 
 (def example {:w 11
               :h 7
