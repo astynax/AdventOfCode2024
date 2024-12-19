@@ -1,5 +1,6 @@
 (ns advent-of-code-2024.day-08
   (:require [clojure.java.io :as io]
+            [clojure.set :as set]
             [advent-of-code-2024.utils :refer :all]))
 
 (defn decode [text]
@@ -54,7 +55,7 @@
 
 (defn count-harmonics-and-antennas [area]
   (count
-   (clojure.set/union
+   (set/union
     (antinodes area harmonics)
     (keys (:map area)))))
 

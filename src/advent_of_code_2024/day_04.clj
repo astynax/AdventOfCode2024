@@ -1,7 +1,7 @@
 (ns advent-of-code-2024.day-04
   (:require [clojure.java.io :as io]
             [clojure.string :as s]
-            [advent-of-code-2024.utils :refer [enumerate keys-of]]))
+            [advent-of-code-2024.utils :refer [enumerate keys-for]]))
 
 (defn decode [raw]
   (reduce
