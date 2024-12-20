@@ -1,6 +1,10 @@
 (ns advent-of-code-2024.utils
   (:require [clojure.string :as s]))
 
+(defn tap [x]
+  (println x)
+  x)
+
 (defn enumerate [xs]
   (map vector (iterate inc 0) xs))
 
@@ -39,6 +43,17 @@
       :in-bounds? (fn [[x y]]
                     (and (<= 0 x) (< x w)
                          (<= 0 y) (< y h)))})))
+
+(defn neibs [valid? [x y]]
+  (->> [[(dec x) y]
+        [(inc x) y]
+        [x (dec y)]
+        [x (inc y)]]
+       (filter valid?)))
+
+(defn manhattan [[x1 y1] [x2 y2]]
+  (+ (abs (- x2 x1))
+     (abs (- y2 y1))))
 
 (def char->digit
   {\0 0

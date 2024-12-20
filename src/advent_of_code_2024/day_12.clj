@@ -35,13 +35,6 @@ MIIISIJEEE
 MMMISSJEEE
 "))
 
-(defn neibs [valid? [x y]]
-  (->> [[(dec x) y]
-        [(inc x) y]
-        [x (dec y)]
-        [x (inc y)]]
-       (filter valid?)))
-
 (defn mark-regions [{m :map
                      :keys [in-bounds?]
                      :as area}]
