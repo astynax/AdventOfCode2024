@@ -1,6 +1,7 @@
 (ns advent-of-code-2024.day-24
   (:require [clojure.java.io :as io]
-            [clojure.string :as s]))
+            [clojure.string :as s]
+            [advent-of-code-2024.utils :refer :all]))
 
 (defn decode [text]
   (let [lines (s/split-lines (s/trim text))
@@ -56,14 +57,45 @@ a AND b -> d
                  rs
                  (cons r later)))))))
 
-(defn from-zs [state]
+(defn number-from [prefix state]
   (->> state
-       (filter #(s/starts-with? (first %) "z"))
+       (filter #(s/starts-with? (first %) prefix))
        (sort-by first)
        (map second)
        reverse
        (reduce (fn [s b] (+ (* 2 s) (if b 1 0))) 0)))
 
-(def solution1 (from-zs (evaluate input)))
+#_ ;; this one generates a .dot file for the GraphViz
+(with-open [f (clojure.java.io/writer "file:///tmp/adder.dot")]
+  (binding [*out* f]
+    (println "digraph adder {")
+    (doseq [[op a b c] (:rules input)]
+      (let [n (str "\"" (name op) "(" a ", " b ")\"")]
+        (println a "->" n ";")
+        (println b "->" n ";")
+        (println n "->" c ";")))
+    (println "}")))
 
-(def solution2 :TODO)
+;; I made this patch by looking with my own eyes at the graphvized plot :P
+(def patch
+  [[[:and "y07" "x07" "z07"] "gmt"]
+   [[:xor "pmc" "mvw" "gmt"] "z07"]
+   [[:xor "y11" "x11" "qjj"] "cbj"]
+   [[:and "x11" "y11" "cbj"] "qjj"]
+   [[:xor "hch" "nff" "dmn"] "z18"]
+   [[:or  "khk" "stg" "z18"] "dmn"]
+   [[:xor "qnm" "rfk" "cfk"] "z35"]
+   [[:and "qnm" "rfk" "z35"] "cfk"]])
+
+(def patched
+  (let [m (->> (for [[[op a b _ :as k] v] patch]
+                 [k [op a b v]])
+               (into {}))]
+    (update input :rules (partial replace m))))
+
+(def solution1 (number-from "z" (evaluate input)))
+
+(def solution2 (->> patch
+                    (map second)
+                    sort
+                    (s/join ",")))

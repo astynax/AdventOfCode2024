@@ -17,9 +17,14 @@
           "e" true}
          (evaluate minimal-example))))
 
-(deftest fromzs-test
-  (is (= 5 (from-zs {"a" false "b" true
-                     "z1" false "z2" true "z0" true}))))
+(deftest number-from-test
+  (is (= 5 (number-from "z" {"a" false "b" true
+                             "z1" false "z2" true "z0" true}))))
+
+(deftest patched-test
+  (is (= (number-from "z" (evaluate patched))
+         (+ (number-from "x" (:state input))
+            (number-from "y" (:state input))))))
 
 (deftest solution1-test
   (is (= 59364044286798 solution1)))
